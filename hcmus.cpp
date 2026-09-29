@@ -1,21 +1,36 @@
 #include <bits/stdc++.h>
 using namespace std;
-const int maxN = 10010;
+
+const int maxN = 100100;
 
 int n, m;
-bool joint[maxN];
-int timeDfs = 0, bridge = 0;
+int timeDfs = 0, scc = 0;
 int low[maxN], num[maxN];
+bool deleted[maxN];
 vector<int> g[maxN];
+stack<int> st;
+
 void dfs(int u, int pre){
-    num[u] = low[u] = ++timeDfs;
+    num[u] = low[u] = timeDfs;
+    timeDfs++;
+    st.push(u);
     for(int v : g[u]){
-        if(v == pre)
-            continue;
+        if(deleted[v]) continue;
         if(!num[v]){
-            dfs(v, u);
             low[u] = min(low[u], low[v]);
-        } else low[u] = min(low[u], num[v]);
+        }
+        else{
+            low[u] = min(low[u], num[v]);
+        }
+    }
+    if(low[u] == num[u]){
+        scc++;
+        int v;
+        do{
+            int v = st.top();
+            st.pop();
+            deleted[v] = 1;
+        } while(v != u);
     }
 }
 int main() {
@@ -23,15 +38,17 @@ int main() {
     cin.tie(0);
     
     cin >> n >> m;
-    fill_n(num, n + 1, false);
-    fill_n(low, n + 1, false);
     for(int i = 0; i < m; i++){
         int u, v;
         cin >> u >> v;
         g[u].push_back(v);
-        g[v].push_back(u);
     }
-    
+    for(int i = 1; i <= n; i++){
+        if(!num[i]){
+            dfs(i, i);
+        }
+    }
+    cout << scc;
     
     return 0;
 }
